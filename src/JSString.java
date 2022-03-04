@@ -1,12 +1,14 @@
 public class JSString extends JSValue {
-    public JSString(String string) {
-        if (string == null) {
+    public JSString(String value) {
+        if (value == null) {
             throw new NullPointerException();
         }
-        this.string = string;
+        this.value = value;
     }
-    private String string;
-    public String getString() {
-        return this.string;
+
+    private String value;
+
+    public String get() {
+        return this.value;
     }
 }

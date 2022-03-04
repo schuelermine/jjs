@@ -36,7 +36,7 @@ public class JSObject extends JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
-        String key = jsKey.getString();
+        String key = jsKey.get();
         if (this.entries.containsKey(key)) {
             return this.entries.get(key).get(this);
         } else if (this.prototype != null) {
@@ -53,7 +53,7 @@ public class JSObject extends JSValue {
         if (jsArgs == null) {
             jsArgs = new JSValue[0];
         }
-        String key = jsKey.getString();
+        String key = jsKey.get();
         JSValue entry = this.entries.get(key).get(this);
         if (entry instanceof JSUndefined) {
             throw new JSString("Method not defined");
@@ -69,7 +69,7 @@ public class JSObject extends JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
-        String key = jsKey.getString();
+        String key = jsKey.get();
         if (this.entries.containsKey(key)) {
             this.entries.get(key).set(this, value);
         } else {
@@ -78,11 +78,12 @@ public class JSObject extends JSValue {
         }
     }
 
-    public void configure(JSString jsKey, JSValue value, Boolean writable, Boolean enumerable, Boolean configurable) throws JSValue {
+    public void configure(JSString jsKey, JSValue value, Boolean writable, Boolean enumerable, Boolean configurable)
+            throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
-        String key = jsKey.getString();
+        String key = jsKey.get();
         if (this.entries.containsKey(key)) {
             this.entries.get(key).configure(value, writable, enumerable, configurable);
         } else {
