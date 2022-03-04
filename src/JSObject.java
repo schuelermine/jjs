@@ -2,6 +2,9 @@ import java.util.Map;
 
 public class JSObject extends JSValue {
     public JSObject(Map<String, JSProperty> entries, JSObject prototype) {
+        if (entries == null) {
+            throw new NullPointerException();
+        }
         this.entries = entries;
         this.prototype = prototype;
         this.frozen = false;
@@ -30,6 +33,9 @@ public class JSObject extends JSValue {
     }
 
     public JSValue get(JSString jsKey) throws JSValue {
+        if (jsKey == null) {
+            throw new NullPointerException();
+        }
         String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
             return this.entries.get(key).get(this);
@@ -39,13 +45,73 @@ public class JSObject extends JSValue {
             return new JSUndefined();
         }
     }
+
+    public JSValue callMethod(JSString jsKey, JSValue[] jsArgs) throws JSValue {
+        if (jsKey == null) {
+            throw new NullPointerException();
+        }
+        if (jsArgs == null) {
+            jsArgs = new JSValue[0];
+        }
+        String key = jsKey.getString();
+        JSValue entry = this.entries.get(key).get(this);
+        if (entry instanceof JSUndefined) {
+            throw new JSString("Method not defined");
+        }
+        if (!(entry instanceof JSFunction)) {
+            throw new JSString("Cannot call non-method");
+        }
+        JSFunction function = (JSFunction) entry;
+        return function.call(new JSUndefined(), this, jsArgs);
+    }
+
+    public void set(JSString jsKey, JSValue value) throws JSValue {
+        if (jsKey == null) {
+            throw new NullPointerException();
+        }
+        String key = jsKey.getString();
+        if (this.entries.containsKey(key)) {
+            this.entries.get(key).set(this, value);
+        } else {
+            JSProperty prop = new JSProperty(value, true, true, true);
+            this.entries.put(key, prop);
+        }
+    }
+
+    public void configure(JSString jsKey, JSValue value, Boolean writable, Boolean enumerable, Boolean configurable) throws JSValue {
+        if (jsKey == null) {
+            throw new NullPointerException();
+        }
+        String key = jsKey.getString();
+        if (this.entries.containsKey(key)) {
+            this.entries.get(key).configure(value, writable, enumerable, configurable);
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+}
+
+enum JSPropertyType {
+    AccessorProperty,
+    DataProperty
 }
 
 class JSProperty {
+    // This class has two constructors for data and accessor properties
+
     public JSProperty(JSValue value, boolean writable, boolean enumerable, boolean configurable) {
+        setup(value, writable, enumerable, configurable);
+    }
+
+    public JSProperty(JSFunction get, JSFunction set, boolean enumerable, boolean configurable) {
+        setup(get, set, enumerable, configurable);
+    }
+
+    private void setup(JSValue value, boolean writable, boolean enumerable, boolean configurable) {
         if (value == null) {
             throw new NullPointerException();
         }
+        this.type = JSPropertyType.DataProperty;
         this.value = value;
         this.get = null;
         this.set = null;
@@ -54,10 +120,8 @@ class JSProperty {
         this.configurable = configurable;
     }
 
-    public JSProperty(JSFunction get, JSFunction set, boolean enumerable, boolean configurable) {
-        if (get == null || set == null) {
-            throw new NullPointerException();
-        }
+    private void setup(JSFunction get, JSFunction set, boolean enumerable, boolean configurable) {
+        this.type = JSPropertyType.AccessorProperty;
         this.value = null;
         this.get = get;
         this.set = set;
@@ -66,6 +130,7 @@ class JSProperty {
         this.configurable = configurable;
     }
 
+    private JSPropertyType type;
     private JSValue value;
     private JSFunction get;
     private JSFunction set;
@@ -74,7 +139,9 @@ class JSProperty {
     private boolean configurable;
 
     public JSValue get(JSValue jsThis) throws JSValue {
-        if (this.value != null) {
+        if (jsThis == null) {
+            throw new NullPointerException();
+        } else if (this.value != null) {
             return this.value;
         } else if (this.get != null) {
             return this.get.call(new JSUndefined(), jsThis, new JSValue[0]);
@@ -107,8 +174,61 @@ class JSProperty {
         return this.configurable;
     }
 
-    public void configure(JSValue value, JSFunction get, JSFunction set,
-            Boolean writable, Boolean enumerable, Boolean configurable) {
+    public void configure(JSValue value, Boolean writable, Boolean enumerable, Boolean configurable) throws JSValue {
+        if (this.type != JSPropertyType.DataProperty) {
+            if (!this.configurable) {
+                throw new JSString("Cannot configure property");
+            }
+            this.setup(value, (boolean) writable, (boolean) enumerable, (boolean) configurable);
+            return;
+        }
+        if (!this.configurable && (writable != null || enumerable != null || configurable != null)) {
+            throw new JSString("Cannot configure property");
+        }
+        if (value != null) {
+            if (!this.writable) {
+                throw new JSString("Cannot set unwritable property");
+            }
+            this.value = value;
+        }
+        this.get = null;
+        this.set = null;
+        if (writable != null) {
+            if (this.writable != false) {
+                this.writable = writable;
+            } else {
+                throw new JSString("Cannot configure unwritable property");
+            }
+        }
+        if (enumerable != null) {
+            this.enumerable = enumerable;
+        }
+        if (configurable != null) {
+            this.configurable = configurable;
+        }
+    }
 
+    public void configure(JSFunction get, JSFunction set, Boolean enumerable, Boolean configurable) throws JSValue {
+        if (!this.configurable) {
+            throw new JSString("Cannot configure property");
+        }
+        if (this.type != JSPropertyType.AccessorProperty) {
+            this.setup(get, set, enumerable, configurable);
+            return;
+        }
+        this.value = null;
+        if (get != null) {
+            this.get = get;
+        }
+        if (set != null) {
+            this.set = set;
+        }
+        this.writable = null;
+        if (enumerable != null) {
+            this.enumerable = enumerable;
+        }
+        if (configurable != null) {
+            this.configurable = configurable;
+        }
     }
 }
