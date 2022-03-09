@@ -31,7 +31,7 @@ public class JSObject extends JSHasPrototype {
         return this.sealed;
     }
 
-    public JSValue get(JSString jsKey) throws JSValue {
+    public JSValue getProperty(JSString jsKey) throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
@@ -39,7 +39,7 @@ public class JSObject extends JSHasPrototype {
         if (this.entries.containsKey(key)) {
             return this.entries.get(key).get(this);
         } else if (this.getPrototype() != null) {
-            return this.getPrototype().get(jsKey);
+            return this.getPrototype().getProperty(jsKey);
         } else {
             return new JSUndefined();
         }
