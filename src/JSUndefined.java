@@ -1,4 +1,4 @@
-public class JSUndefined extends JSNoPrototype {
+public class JSUndefined extends JSNullish {
     public JSUndefined() {
     }
 }

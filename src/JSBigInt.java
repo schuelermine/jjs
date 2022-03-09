@@ -1,6 +1,6 @@
 import java.math.BigInteger;
 
-public class JSBigInt extends JSHasPrototype {
+public class JSBigInt extends JSValue {
     public JSBigInt(BigInteger value) {
         this.value = value;
     }
