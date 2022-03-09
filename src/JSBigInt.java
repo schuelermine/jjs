@@ -1,6 +1,6 @@
 import java.math.BigInteger;
 
-public class JSBigInt extends JSValue {
+public class JSBigInt extends JSValue implements JSHasPrototype {
     public JSBigInt(BigInteger value) {
         this.value = value;
     }
@@ -49,5 +49,9 @@ public class JSBigInt extends JSValue {
 
     public static JSBigInt xor(JSBigInt value1, JSBigInt value2) {
         return new JSBigInt(value1.get().xor(value2.get()));
+    }
+
+    public JSObject getPrototype() {
+        return null;
     }
 }

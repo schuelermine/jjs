@@ -1,4 +1,4 @@
-public class JSBoolean extends JSValue {
+public class JSBoolean extends JSValue implements JSHasPrototype {
     public JSBoolean(boolean value) {
         this.value = value;
     }
@@ -7,5 +7,9 @@ public class JSBoolean extends JSValue {
 
     public boolean get() {
         return this.value;
+    }
+
+    public JSObject getPrototype() {
+        return null;
     }
 }

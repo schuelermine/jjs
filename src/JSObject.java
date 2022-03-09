@@ -1,6 +1,6 @@
 import java.util.Map;
 
-public class JSObject extends JSValue {
+public class JSObject extends JSValue implements JSHasPrototype {
     public JSObject(Map<String, JSProperty> entries, JSObject prototype) {
         if (entries == null) {
             throw new NullPointerException();
@@ -9,7 +9,21 @@ public class JSObject extends JSValue {
         this.prototype = prototype;
         this.frozen = false;
         this.sealed = false;
+        this.unfreezable = false;
     }
+
+    public JSObject(Map<String, JSProperty> entries, JSObject prototype, boolean unfreezable) {
+        if (entries == null) {
+            throw new NullPointerException();
+        }
+        this.entries = entries;
+        this.prototype = prototype;
+        this.frozen = false;
+        this.sealed = false;
+        this.unfreezable = unfreezable;
+    }
+
+    private boolean unfreezable;
 
     private Map<String, JSProperty> entries;
     private JSObject prototype;
@@ -20,7 +34,10 @@ public class JSObject extends JSValue {
         this.frozen = true;
     }
 
-    public boolean isFrozen() {
+    public boolean isFrozen() throws JSValue {
+        if (this.unfreezable) {
+            throw new JSString("Cannot freeze this object");
+        }
         return this.frozen;
     }
 
@@ -29,6 +46,9 @@ public class JSObject extends JSValue {
     }
 
     public boolean isSealed() {
+        for (String key : this.entries.keySet()) {
+            this.entries.get(key).setConfigurability(false);
+        }
         return this.sealed;
     }
 
@@ -69,10 +89,16 @@ public class JSObject extends JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
+        if (this.frozen) {
+            throw new JSString("Cannot set property on frozen object");
+        }
         String key = jsKey.get();
         if (this.entries.containsKey(key)) {
             this.entries.get(key).set(this, value);
         } else {
+            if (this.sealed) {
+                throw new JSString("Cannot add property on sealed object");
+            }
             JSProperty prop = new JSProperty(value, true, true, true);
             this.entries.put(key, prop);
         }
@@ -83,12 +109,29 @@ public class JSObject extends JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
+        if (this.frozen) {
+            throw new JSString("Cannot configure property on frozen object");
+            // This is not vanilla behaviour! If the new configuration is identical JS would not throw.
+            // This can be bypassed by altered surrounding code as frozen status is available.
+        }
         String key = jsKey.get();
         if (this.entries.containsKey(key)) {
             this.entries.get(key).configure(value, writable, enumerable, configurable);
         } else {
             throw new IndexOutOfBoundsException();
+            // Another reason why this should be wrapped to provide behaviour more like defineProperty().
         }
+    }
+
+    public JSObject getPrototype() {
+        return this.prototype;
+    }
+
+    public void setPrototype(JSObject prototype) throws JSValue {
+        if (this.frozen) {
+            throw new JSString("Cannot alter prototype of frozen object");
+        }
+        this.prototype = prototype;
     }
 }
 
@@ -157,8 +200,8 @@ class JSProperty {
                 this.value = value;
             } else {
                 throw new JSString("Cannot set unwritable property");
-                // This is the wrong value to throw! Might be replaced if the full error
-                // prototype chain is ever done.
+                // This is the wrong value to throw! Also, this happens in loads of other places.
+                // Might be replaced if the full error prototype chain is ever done.
             }
         } else if (this.set != null) {
             this.set.call(new JSUndefined(), jsThis, new JSValue[0]);
@@ -231,5 +274,9 @@ class JSProperty {
         if (configurable != null) {
             this.configurable = configurable;
         }
+    }
+
+    public void setConfigurability(boolean configurable) {
+        this.configurable = configurable;
     }
 }
