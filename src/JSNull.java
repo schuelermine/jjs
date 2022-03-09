@@ -1,4 +1,4 @@
-public class JSNull extends JSNullish {
+public class JSNull extends JSNoPrototype {
     public JSNull() {
     }
 }

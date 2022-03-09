@@ -1,18 +1,17 @@
 import java.util.Map;
 
-public class JSObject extends JSValue {
+public class JSObject extends JSHasPrototype {
     public JSObject(Map<String, JSProperty> entries, JSObject prototype) {
+        super(prototype);
         if (entries == null) {
             throw new NullPointerException();
         }
         this.entries = entries;
-        this.prototype = prototype;
         this.frozen = false;
         this.sealed = false;
     }
 
     private Map<String, JSProperty> entries;
-    private JSObject prototype;
     private boolean frozen;
     private boolean sealed;
 
@@ -39,8 +38,8 @@ public class JSObject extends JSValue {
         String key = jsKey.get();
         if (this.entries.containsKey(key)) {
             return this.entries.get(key).get(this);
-        } else if (this.prototype != null) {
-            return this.prototype.get(jsKey);
+        } else if (this.getPrototype() != null) {
+            return this.getPrototype().get(jsKey);
         } else {
             return new JSUndefined();
         }

@@ -1,4 +1,4 @@
-public class JSString extends JSValue {
+public class JSString extends JSHasPrototype {
     public JSString(String value) {
         if (value == null) {
             throw new NullPointerException();
