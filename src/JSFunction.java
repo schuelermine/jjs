@@ -1,6 +1,6 @@
 import java.util.Map;
 
-public class JSFunction extends JSObject {
+class JSFunction extends JSObject {
     public JSFunction(JSFunctionLambda function, Map<String, JSProperty> entries, JSObject prototype) {
         super(entries, prototype);
         if (function == null || entries == null) {

@@ -1,4 +1,4 @@
-public class JSNumber extends JSValue implements JSHasPrototype {
+class JSNumber extends JSValue implements JSHasPrototype {
     public JSNumber(double value) {
         this.value = value;
     }

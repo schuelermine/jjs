@@ -1,6 +1,6 @@
 import java.util.UUID;
 
-public class JSSymbol {
+class JSSymbol {
     public JSSymbol(JSString name, UUID uuid) {
         this.name = name.get();
         this.uuid = uuid;

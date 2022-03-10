@@ -1,6 +1,6 @@
 import java.util.Map;
 
-public class JSObject extends JSValue implements JSHasPrototype {
+class JSObject extends JSValue implements JSHasPrototype {
     public JSObject(Map<String, JSProperty> entries, JSObject prototype) {
         if (entries == null) {
             throw new NullPointerException();

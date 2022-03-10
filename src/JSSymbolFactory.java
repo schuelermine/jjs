@@ -1,7 +1,7 @@
 import java.util.Set;
 import java.util.UUID;
 
-public class JSSymbolFactory {
+class JSSymbolFactory {
     public JSSymbolFactory(Set<UUID> takenUUIDs) {
         this.takenUUIDs = takenUUIDs;
     }

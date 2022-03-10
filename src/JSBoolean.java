@@ -1,4 +1,4 @@
-public class JSBoolean extends JSValue implements JSHasPrototype {
+class JSBoolean extends JSValue implements JSHasPrototype {
     public JSBoolean(boolean value) {
         this.value = value;
     }

@@ -1,2 +1,2 @@
-abstract public class JSNullish extends JSValue {
+abstract class JSNullish extends JSValue {
 }
