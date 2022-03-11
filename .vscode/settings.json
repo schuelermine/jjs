@@ -1,4 +1,9 @@
 {
+    "[java]": {
+        "editor.suggest.snippetsPreventQuickSuggestions": false,
+        "editor.formatOnSave": true
+    },
     "java.project.sourcePaths": ["src"],
-    "java.project.outputPath": "bin"
+    "java.project.outputPath": "bin",
+    "cSpell.language": "en-GB"
 }

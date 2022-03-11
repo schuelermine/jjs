@@ -106,7 +106,7 @@ class JSObject extends JSValue implements JSHasPrototype {
         }
         final String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
-            this.entries.get(key).set(this, value);
+            this.entries.get(key).setValue(this, value);
         } else {
             if (this.sealed) {
                 throw new JSString("Cannot add property on sealed object");
@@ -159,8 +159,8 @@ class JSProperty {
         setup(value, writable, enumerable, configurable);
     }
 
-    public JSProperty(JSFunction get, JSFunction set, boolean enumerable, boolean configurable) {
-        setup(get, set, enumerable, configurable);
+    public JSProperty(JSFunction getter, JSFunction setter, boolean enumerable, boolean configurable) {
+        setup(getter, setter, enumerable, configurable);
     }
 
     private void setup(JSValue value, boolean writable, boolean enumerable, boolean configurable) {
@@ -169,18 +169,18 @@ class JSProperty {
         }
         this.type = JSPropertyType.DataProperty;
         this.value = value;
-        this.get = null;
-        this.set = null;
+        this.getter = null;
+        this.setter = null;
         this.writable = writable;
         this.enumerable = enumerable;
         this.configurable = configurable;
     }
 
-    private void setup(JSFunction get, JSFunction set, boolean enumerable, boolean configurable) {
+    private void setup(JSFunction getter, JSFunction setter, boolean enumerable, boolean configurable) {
         this.type = JSPropertyType.AccessorProperty;
         this.value = null;
-        this.get = get;
-        this.set = set;
+        this.getter = getter;
+        this.setter = setter;
         this.writable = null;
         this.enumerable = enumerable;
         this.configurable = configurable;
@@ -188,8 +188,8 @@ class JSProperty {
 
     private JSPropertyType type;
     private JSValue value;
-    private JSFunction get;
-    private JSFunction set;
+    private JSFunction getter;
+    private JSFunction setter;
     private Boolean writable;
     private boolean enumerable;
     private boolean configurable;
@@ -199,14 +199,14 @@ class JSProperty {
             throw new NullPointerException();
         } else if (this.value != null) {
             return this.value;
-        } else if (this.get != null) {
-            return this.get.call(new JSUndefined(), jsThis, new JSValue[0]);
+        } else if (this.getter != null) {
+            return this.getter.call(new JSUndefined(), jsThis, new JSValue[0]);
         } else {
             throw new IndexOutOfBoundsException();
         }
     }
 
-    public void set(JSValue jsThis, JSValue value) throws JSValue {
+    public void setValue(JSValue jsThis, JSValue value) throws JSValue {
         if (this.value != null) {
             if (this.writable) {
                 this.value = value;
@@ -215,8 +215,8 @@ class JSProperty {
                 // This is the wrong value to throw! Also, this happens in loads of other places.
                 // Might be replaced if the full error prototype chain is ever done.
             }
-        } else if (this.set != null) {
-            this.set.call(new JSUndefined(), jsThis, new JSValue[0]);
+        } else if (this.setter != null) {
+            this.setter.call(new JSUndefined(), jsThis, new JSValue[0]);
         } else {
             throw new JSString("Cannot set property with only a getter");
         }
@@ -247,8 +247,8 @@ class JSProperty {
             }
             this.value = value;
         }
-        this.get = null;
-        this.set = null;
+        this.getter = null;
+        this.setter = null;
         if (writable != null) {
             if (this.writable != false) {
                 this.writable = writable;
@@ -264,20 +264,20 @@ class JSProperty {
         }
     }
 
-    public void configure(JSFunction get, JSFunction set, Boolean enumerable, Boolean configurable) throws JSValue {
+    public void configure(JSFunction getter, JSFunction setter, Boolean enumerable, Boolean configurable) throws JSValue {
         if (!this.configurable) {
             throw new JSString("Cannot configure property");
         }
         if (this.type != JSPropertyType.AccessorProperty) {
-            this.setup(get, set, enumerable, configurable);
+            this.setup(getter, setter, enumerable, configurable);
             return;
         }
         this.value = null;
-        if (get != null) {
-            this.get = get;
+        if (getter != null) {
+            this.getter = getter;
         }
-        if (set != null) {
-            this.set = set;
+        if (setter != null) {
+            this.setter = setter;
         }
         this.writable = null;
         if (enumerable != null) {
