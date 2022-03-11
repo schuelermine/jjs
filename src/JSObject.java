@@ -50,18 +50,18 @@ class JSObject extends JSValue implements JSHasPrototype {
         }
         return this.sealed;
     }
-
+    
     public JSValue getProperty(JSString jsKey) throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
         final String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
-            return this.entries.get(key).get(this);
+            return this.entries.get(key).getValue(this);
         } else if (this.prototype != null) {
             return this.prototype.getProperty(jsKey);
         } else {
-            return new JSUndefined();
+            throw new IndexOutOfBoundsException();
         }
     }
 
@@ -71,9 +71,9 @@ class JSObject extends JSValue implements JSHasPrototype {
         }
         final String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
-            return this.entries.get(key).get(this);
+            return this.entries.get(key).getValue(this);
         } else {
-            return new JSUndefined();
+            throw new IndexOutOfBoundsException();
         }
     }
 
@@ -85,7 +85,7 @@ class JSObject extends JSValue implements JSHasPrototype {
             jsArgs = new JSValue[0];
         }
         final String key = jsKey.getString();
-        final JSValue entry = this.entries.get(key).get(this);
+        final JSValue entry = this.entries.get(key).getValue(this);
         if (entry instanceof JSUndefined) {
             throw new JSString("Method not defined");
         }
@@ -194,7 +194,7 @@ class JSProperty {
     private boolean enumerable;
     private boolean configurable;
 
-    public JSValue get(JSValue jsThis) throws JSValue {
+    public JSValue getValue(JSValue jsThis) throws JSValue {
         if (jsThis == null) {
             throw new NullPointerException();
         } else if (this.value != null) {
@@ -202,7 +202,7 @@ class JSProperty {
         } else if (this.get != null) {
             return this.get.call(new JSUndefined(), jsThis, new JSValue[0]);
         } else {
-            return new JSUndefined();
+            throw new IndexOutOfBoundsException();
         }
     }
 
