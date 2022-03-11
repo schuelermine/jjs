@@ -8,7 +8,7 @@ class JSSymbolFactory {
 
     private final Set<UUID> takenUUIDs;
 
-    public JSSymbol mkSymbol(JSString name) {
+    public JSSymbol newSymbol(JSString name) {
         UUID uuid = UUID.randomUUID();
         this.takenUUIDs.add(uuid);
         return new JSSymbol(name, uuid);

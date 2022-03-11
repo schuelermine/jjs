@@ -45,12 +45,12 @@ class JSObject extends JSValue implements JSHasPrototype {
     }
 
     public boolean isSealed() {
-        for (String key : this.entries.keySet()) {
-            this.entries.get(key).setConfigurability(false);
+        for (JSProperty property : this.entries.values()) {
+            property.setConfigurability(false);
         }
         return this.sealed;
     }
-    
+
     public JSValue getProperty(JSString jsKey) throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
@@ -91,8 +91,7 @@ class JSObject extends JSValue implements JSHasPrototype {
         }
         if (entry instanceof JSFunction f) {
             return f.call(new JSUndefined(), this, jsArgs);
-        }
-        else {
+        } else {
             throw new JSString("Cannot call non-method");
         }
     }
@@ -116,22 +115,26 @@ class JSObject extends JSValue implements JSHasPrototype {
         }
     }
 
-    public void configureProperty(JSString jsKey, JSValue value, Boolean writable, Boolean enumerable, Boolean configurable)
+    public void configureProperty(JSString jsKey, JSValue value, Boolean writable, Boolean enumerable,
+            Boolean configurable)
             throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
         if (this.frozen) {
             throw new JSString("Cannot configure property on frozen object");
-            // This is not vanilla behaviour! If the new configuration is identical JS would not throw.
-            // This can be bypassed by altered surrounding code as frozen status is available.
+            // This is not vanilla behaviour! If the new configuration is identical JS would
+            // not throw.
+            // This can be bypassed by altered surrounding code as frozen status is
+            // available.
         }
         final String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
             this.entries.get(key).configure(value, writable, enumerable, configurable);
         } else {
             throw new IndexOutOfBoundsException();
-            // Another reason why this should be wrapped to provide behaviour more like defineProperty().
+            // Another reason why this should be wrapped to provide behaviour more like
+            // defineProperty().
         }
     }
 
@@ -148,8 +151,8 @@ class JSObject extends JSValue implements JSHasPrototype {
 }
 
 enum JSPropertyType {
-    AccessorProperty,
-    DataProperty
+    ACCESSOR,
+    DATA
 }
 
 class JSProperty {
@@ -167,7 +170,7 @@ class JSProperty {
         if (value == null) {
             throw new NullPointerException();
         }
-        this.type = JSPropertyType.DataProperty;
+        this.type = JSPropertyType.DATA;
         this.value = value;
         this.getter = null;
         this.setter = null;
@@ -177,7 +180,7 @@ class JSProperty {
     }
 
     private void setup(JSFunction getter, JSFunction setter, boolean enumerable, boolean configurable) {
-        this.type = JSPropertyType.AccessorProperty;
+        this.type = JSPropertyType.ACCESSOR;
         this.value = null;
         this.getter = getter;
         this.setter = setter;
@@ -194,25 +197,28 @@ class JSProperty {
     private boolean enumerable;
     private boolean configurable;
 
+    private static final String CANNOT_CONFIGURE = "Cannot configure property";
+
     public JSValue getValue(JSValue jsThis) throws JSValue {
         if (jsThis == null) {
             throw new NullPointerException();
-        } else if (this.value != null) {
+        } else if (this.type == JSPropertyType.DATA) {
             return this.value;
         } else if (this.getter != null) {
             return this.getter.call(new JSUndefined(), jsThis, new JSValue[0]);
         } else {
-            throw new IndexOutOfBoundsException();
+            throw new JSString("Cannot get this property with only a setter");
         }
     }
 
     public void setValue(JSValue jsThis, JSValue value) throws JSValue {
-        if (this.value != null) {
+        if (this.type == JSPropertyType.DATA) {
             if (this.writable) {
                 this.value = value;
             } else {
                 throw new JSString("Cannot set unwritable property");
-                // This is the wrong value to throw! Also, this happens in loads of other places.
+                // This is the wrong value to throw! Also, this happens in loads of other
+                // places.
                 // Might be replaced if the full error prototype chain is ever done.
             }
         } else if (this.setter != null) {
@@ -231,18 +237,18 @@ class JSProperty {
     }
 
     public void configure(JSValue value, Boolean writable, Boolean enumerable, Boolean configurable) throws JSValue {
-        if (this.type != JSPropertyType.DataProperty) {
+        if (this.type != JSPropertyType.DATA) {
             if (!this.configurable) {
-                throw new JSString("Cannot configure property");
+                throw new JSString(CANNOT_CONFIGURE);
             }
-            this.setup(value, (boolean) writable, (boolean) enumerable, (boolean) configurable);
+            this.setup(value, writable, enumerable, configurable);
             return;
         }
         if (!this.configurable && (writable != null || enumerable != null || configurable != null)) {
-            throw new JSString("Cannot configure property");
+            throw new JSString(CANNOT_CONFIGURE);
         }
         if (value != null) {
-            if (!this.writable) {
+            if (Boolean.FALSE.equals(this.writable)) {
                 throw new JSString("Cannot set unwritable property");
             }
             this.value = value;
@@ -250,7 +256,7 @@ class JSProperty {
         this.getter = null;
         this.setter = null;
         if (writable != null) {
-            if (this.writable != false) {
+            if (Boolean.TRUE.equals(this.writable)) {
                 this.writable = writable;
             } else {
                 throw new JSString("Cannot configure unwritable property");
@@ -264,11 +270,12 @@ class JSProperty {
         }
     }
 
-    public void configure(JSFunction getter, JSFunction setter, Boolean enumerable, Boolean configurable) throws JSValue {
+    public void configure(JSFunction getter, JSFunction setter, Boolean enumerable, Boolean configurable)
+            throws JSValue {
         if (!this.configurable) {
-            throw new JSString("Cannot configure property");
+            throw new JSString(CANNOT_CONFIGURE);
         }
-        if (this.type != JSPropertyType.AccessorProperty) {
+        if (this.type != JSPropertyType.ACCESSOR) {
             this.setup(getter, setter, enumerable, configurable);
             return;
         }

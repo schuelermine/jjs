@@ -1,3 +1,4 @@
+import java.util.Objects;
 import java.util.UUID;
 
 class JSSymbol {
@@ -13,8 +14,17 @@ class JSSymbol {
         return new JSString(this.name);
     }
 
-    public boolean equals(JSSymbol symbol) {
-        return this.uuid.equals(symbol.uuid);
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.uuid, this.name);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object instanceof JSSymbol symbol) {
+            return this.uuid.equals(symbol.uuid);
+        } else {
+            return false;
+        }
     }
 }
-

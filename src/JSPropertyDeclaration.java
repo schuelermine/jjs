@@ -3,7 +3,7 @@ public class JSPropertyDeclaration {
         if (name == null || value == null) {
             throw new NullPointerException();
         }
-        this.type = JSPropertyType.DataProperty;
+        this.type = JSPropertyType.DATA;
         this.name = name;
         this.value = value;
         this.getter = null;
@@ -14,7 +14,7 @@ public class JSPropertyDeclaration {
         if (name == null || (getter == null && setter == null)) {
             throw new NullPointerException();
         }
-        this.type = JSPropertyType.AccessorProperty;
+        this.type = JSPropertyType.ACCESSOR;
         this.name = name;
         this.value = null;
         this.getter = getter;
@@ -28,7 +28,7 @@ public class JSPropertyDeclaration {
     private final JSPropertyType type;
 
     public JSProperty toJSProperty() {
-        if (this.type == JSPropertyType.DataProperty) {
+        if (this.type == JSPropertyType.DATA) {
             return new JSProperty(this.value, true, true, true);
         } else {
             return new JSProperty(this.getter, this.setter, true, true);
