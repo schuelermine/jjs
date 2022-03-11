@@ -1,3 +1,5 @@
+// This class is only there for debugging purposes, in real JS you’d never see a list of all symbols
+
 import java.util.Set;
 import java.util.UUID;
 
