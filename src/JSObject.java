@@ -5,22 +5,22 @@ class JSObject extends JSValue implements JSHasPrototype {
         if (entries == null) {
             throw new NullPointerException();
         }
+        this.unfreezable = false;
         this.entries = entries;
         this.prototype = prototype;
         this.frozen = false;
         this.sealed = false;
-        this.unfreezable = false;
     }
 
     public JSObject(Map<String, JSProperty> entries, JSObject prototype, boolean unfreezable) {
         if (entries == null) {
             throw new NullPointerException();
         }
+        this.unfreezable = unfreezable;
         this.entries = entries;
         this.prototype = prototype;
         this.frozen = false;
         this.sealed = false;
-        this.unfreezable = unfreezable;
     }
 
     private final boolean unfreezable;
