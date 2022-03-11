@@ -3,9 +3,9 @@ class JSBoolean extends JSValue implements JSHasPrototype {
         this.value = value;
     }
 
-    private boolean value;
+    private final boolean value;
 
-    public boolean get() {
+    public boolean getBoolean() {
         return this.value;
     }
 

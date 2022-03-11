@@ -2,12 +2,12 @@ import java.util.UUID;
 
 class JSSymbol {
     public JSSymbol(JSString name, UUID uuid) {
-        this.name = name.get();
+        this.name = name.getString();
         this.uuid = uuid;
     }
 
-    private String name;
-    private UUID uuid;
+    private final String name;
+    private final UUID uuid;
 
     public JSString getName() {
         return new JSString(this.name);

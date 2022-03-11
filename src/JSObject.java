@@ -23,9 +23,8 @@ class JSObject extends JSValue implements JSHasPrototype {
         this.unfreezable = unfreezable;
     }
 
-    private boolean unfreezable;
-
-    private Map<String, JSProperty> entries;
+    private final boolean unfreezable;
+    private final Map<String, JSProperty> entries;
     private JSObject prototype;
     private boolean frozen;
     private boolean sealed;
@@ -52,15 +51,27 @@ class JSObject extends JSValue implements JSHasPrototype {
         return this.sealed;
     }
 
-    public JSValue get(JSString jsKey) throws JSValue {
+    public JSValue getProperty(JSString jsKey) throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
-        String key = jsKey.get();
+        final String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
             return this.entries.get(key).get(this);
         } else if (this.prototype != null) {
-            return this.prototype.get(jsKey);
+            return this.prototype.getProperty(jsKey);
+        } else {
+            return new JSUndefined();
+        }
+    }
+
+    public JSValue getOwnProperty(JSString jsKey) throws JSValue {
+        if (jsKey == null) {
+            throw new NullPointerException();
+        }
+        final String key = jsKey.getString();
+        if (this.entries.containsKey(key)) {
+            return this.entries.get(key).get(this);
         } else {
             return new JSUndefined();
         }
@@ -73,38 +84,39 @@ class JSObject extends JSValue implements JSHasPrototype {
         if (jsArgs == null) {
             jsArgs = new JSValue[0];
         }
-        String key = jsKey.get();
-        JSValue entry = this.entries.get(key).get(this);
+        final String key = jsKey.getString();
+        final JSValue entry = this.entries.get(key).get(this);
         if (entry instanceof JSUndefined) {
             throw new JSString("Method not defined");
         }
-        if (!(entry instanceof JSFunction)) {
+        if (entry instanceof JSFunction f) {
+            return f.call(new JSUndefined(), this, jsArgs);
+        }
+        else {
             throw new JSString("Cannot call non-method");
         }
-        JSFunction function = (JSFunction) entry;
-        return function.call(new JSUndefined(), this, jsArgs);
     }
 
-    public void set(JSString jsKey, JSValue value) throws JSValue {
+    public void setOrCreateProperty(JSString jsKey, JSValue value) throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
         }
         if (this.frozen) {
             throw new JSString("Cannot set property on frozen object");
         }
-        String key = jsKey.get();
+        final String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
             this.entries.get(key).set(this, value);
         } else {
             if (this.sealed) {
                 throw new JSString("Cannot add property on sealed object");
             }
-            JSProperty prop = new JSProperty(value, true, true, true);
-            this.entries.put(key, prop);
+            final JSProperty property = new JSProperty(value, true, true, true);
+            this.entries.put(key, property);
         }
     }
 
-    public void configure(JSString jsKey, JSValue value, Boolean writable, Boolean enumerable, Boolean configurable)
+    public void configureProperty(JSString jsKey, JSValue value, Boolean writable, Boolean enumerable, Boolean configurable)
             throws JSValue {
         if (jsKey == null) {
             throw new NullPointerException();
@@ -114,7 +126,7 @@ class JSObject extends JSValue implements JSHasPrototype {
             // This is not vanilla behaviour! If the new configuration is identical JS would not throw.
             // This can be bypassed by altered surrounding code as frozen status is available.
         }
-        String key = jsKey.get();
+        final String key = jsKey.getString();
         if (this.entries.containsKey(key)) {
             this.entries.get(key).configure(value, writable, enumerable, configurable);
         } else {

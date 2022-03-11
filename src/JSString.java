@@ -6,9 +6,9 @@ class JSString extends JSValue implements JSHasPrototype {
         this.value = value;
     }
 
-    private String value;
+    private final String value;
 
-    public String get() {
+    public String getString() {
         return this.value;
     }
 

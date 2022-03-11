@@ -9,7 +9,7 @@ class JSFunction extends JSObject {
         this.function = function;
     }
 
-    private JSFunctionLambda function;
+    private final JSFunctionLambda function;
 
     public JSValue call(JSValue newTarget, JSValue jsThis, JSValue[] jsArgs) throws JSValue {
         if (newTarget == null || jsThis == null) {

@@ -5,50 +5,50 @@ class JSBigInt extends JSValue implements JSHasPrototype {
         this.value = value;
     }
 
-    private BigInteger value;
+    private final BigInteger value;
 
-    public BigInteger get() {
+    public BigInteger getBigInteger() {
         return this.value;
     }
 
     public static JSBigInt add(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().add(value2.get()));
+        return new JSBigInt(value1.getBigInteger().add(value2.getBigInteger()));
     }
 
     public static JSBigInt subtract(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().subtract(value2.get()));
+        return new JSBigInt(value1.getBigInteger().subtract(value2.getBigInteger()));
     }
 
     public static JSBigInt multiply(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().multiply(value2.get()));
+        return new JSBigInt(value1.getBigInteger().multiply(value2.getBigInteger()));
     }
 
     public static JSBigInt divide(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().divide(value2.get()));
+        return new JSBigInt(value1.getBigInteger().divide(value2.getBigInteger()));
     }
 
     public static JSBigInt remainder(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().remainder(value2.get()));
+        return new JSBigInt(value1.getBigInteger().remainder(value2.getBigInteger()));
     }
 
     public static JSBigInt shiftLeft(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().shiftLeft(value2.get().intValue()));
+        return new JSBigInt(value1.getBigInteger().shiftLeft(value2.getBigInteger().intValue()));
     }
 
     public static JSBigInt shiftRight(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().shiftRight(value2.get().intValue()));
+        return new JSBigInt(value1.getBigInteger().shiftRight(value2.getBigInteger().intValue()));
     }
 
     public static JSBigInt and(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().and(value2.get()));
+        return new JSBigInt(value1.getBigInteger().and(value2.getBigInteger()));
     }
 
     public static JSBigInt or(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().or(value2.get()));
+        return new JSBigInt(value1.getBigInteger().or(value2.getBigInteger()));
     }
 
     public static JSBigInt xor(JSBigInt value1, JSBigInt value2) {
-        return new JSBigInt(value1.get().xor(value2.get()));
+        return new JSBigInt(value1.getBigInteger().xor(value2.getBigInteger()));
     }
 
     public JSObject getPrototype() {
