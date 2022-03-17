@@ -1,3 +1,5 @@
+# ❗This repository is being re-developed from scratch
+
 # JJS
 
 JJS is an implementation of some aspects of the JavaScript object and primitive world in Java.  
