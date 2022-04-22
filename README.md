@@ -1,5 +1,5 @@
 # ❗This repository is being re-developed from scratch
-Last usable version: commit d92c9bf
+# The last usable version was commit d92c9bf. [Browse that version on GitHub here](https://github.com/schuelermine/jjs/tree/d92c9bf8626157e2ca9329042d192a2d8714fcd8)
 
 # JJS
 
